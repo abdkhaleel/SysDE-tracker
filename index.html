@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Prep Tracker — Interactive</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+/* ─── CSS Variables & Themes ─── */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --border-primary: #cbd5e1;
+  --border-secondary: #e2e8f0;
+  --border-tertiary: #f1f5f9;
+  --accent: #1D9E75;
+  --accent-light: #E1F5EE;
+  --accent-glow: rgba(29, 158, 117, 0.25);
+  --danger: #A32D2D;
+  --danger-bg: #FCEBEB;
+  --warn: #854F0B;
+  --warn-bg: #FAEEDA;
+  --info: #185FA5;
+  --info-bg: #E6F1FB;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  --shadow-glow: 0 0 20px var(--accent-glow);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --transition-fast: 0.15s cubic-bezier(0.4,0,0.2,1);
+  --transition-base: 0.3s cubic-bezier(0.4,0,0.2,1);
+  --transition-spring: 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0b1120;
+  --bg-secondary: #151e32;
+  --bg-tertiary: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --border-primary: #334155;
+  --border-secondary: #1e293b;
+  --border-tertiary: #0f172a;
+  --accent: #34d399;
+  --accent-light: rgba(52,211,153,0.12);
+  --accent-glow: rgba(52,211,153,0.3);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background var(--transition-base), color var(--transition-base);
+  overflow-x: hidden;
+}
+
+/* Animated background mesh */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(29,158,117,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(24,95,165,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  animation: bgPulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes bgPulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 99px;
+  transition: background var(--transition-fast);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ─── Root Container ─── */
+.root {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header / Theme Toggle ─── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.7s ease-out 0.1s both;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.theme-toggle {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: rotate(15deg) scale(1.05);
+  box-shadow: var(--shadow-glow);
+}
+
+.theme-toggle:active { transform: scale(0.92); }
+
+.theme-toggle .ti-sun { display: none; }
+[data-theme="dark"] .ti-sun { display: inline; }
+[data-theme="dark"] .ti-moon { display: none; }
+
+/* ─── Tab Bar ─── */
+.tab-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  animation: fadeInUp 0.7s ease-out 0.15s both;
+}
+
+.tab {
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-light), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tab:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.tab:hover::before { opacity: 1; }
+
+.tab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(29,158,117,0.35);
+  transform: translateY(-1px);
+}
+
+.tab.active:hover {
+  background: #168a63;
+  box-shadow: 0 6px 20px rgba(29,158,117,0.45);
+}
+
+.tab:active { transform: scale(0.96) translateY(0); }
+
+.tab i { font-size: 1.1rem; transition: transform var(--transition-spring); }
+.tab:hover i { transform: scale(1.15); }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.7s ease-out 0.2s both;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.toolbar-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.toolbar-btn:hover::after { opacity: 1; }
+
+.toolbar-btn:active { transform: scale(0.95) translateY(0); }
+
+.toolbar-btn i { font-size: 1.1rem; transition: transform var(--transition-spring); }
+.toolbar-btn:hover i { transform: scale(1.2) rotate(-5deg); }
+
+.toolbar-btn.save-btn {
+  color: #0F6E56;
+  border-color: #5DCAA5;
+  background: linear-gradient(135deg, #E1F5EE, #d4f3e7);
+}
+
+[data-theme="dark"] .toolbar-btn.save-btn {
+  background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.08));
+  color: #34d399;
+  border-color: rgba(52,211,153,0.3);
+}
+
+.toolbar-btn.save-btn:hover {
+  background: linear-gradient(135deg, #9FE1CB, #8fdcc3);
+  box-shadow: 0 4px 14px rgba(29,158,117,0.25);
+}
+
+.toolbar-btn.load-btn {
+  color: #185FA5;
+  border-color: #85B7EB;
+  background: linear-gradient(135deg, #E6F1FB, #d9eafc);
+}
+
+[data-theme="dark"] .toolbar-btn.load-btn {
+  background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(56,189,248,0.08));
+  color: #38bdf8;
+  border-color: rgba(56,189,248,0.3);
+}
+
+.toolbar-btn.load-btn:hover {
+  background: linear-gradient(135deg, #B5D4F4, #a3caf1);
+  box-shadow: 0 4px 14px rgba(24,95,165,0.2);
+}
+
+.save-meta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-left: 4px;
+  transition: color var(--transition-fast);
+}
+
+/* ─── Toast ─── */
+.toast {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  margin-left: auto;
+  backdrop-filter: blur(10px);
+  animation: toastSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(30px) scale(0.9); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.toast.success {
+  background: rgba(225,245,238,0.95);
+  color: #0F6E56;
+  border: 1px solid #5DCAA5;
+  display: flex;
+}
+
+[data-theme="dark"] .toast.success {
+  background: rgba(6,78,59,0.9);
+  color: #34d399;
+  border-color: rgba(52,211,153,0.4);
+}
+
+.toast.error {
+  background: rgba(252,235,235,0.95);
+  color: #A32D2D;
+  border: 1px solid #F09595;
+  display: flex;
+}
+
+[data-theme="dark"] .toast.error {
+  background: rgba(127,29,29,0.9);
+  color: #fca5a5;
+  border-color: rgba(252,165,165,0.4);
+}
+
+.toast.info {
+  background: rgba(230,241,251,0.95);
+  color: #185FA5;
+  border: 1px solid #85B7EB;
+  display: flex;
+}
+
+[data-theme="dark"] .toast.info {
+  background: rgba(12,74,110,0.9);
+  color: #7dd3fc;
+  border-color: rgba(125,211,252,0.4);
+}
+
+.toast i { font-size: 1.1rem; animation: popIn 0.3s var(--transition-spring); }
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* ─── Progress Bar ─── */
+.progress-bar-wrap {
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.7s ease-out 0.25s both;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border-secondary);
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1D9E75, #2dd4a0, #1D9E75);
+  background-size: 200% 100%;
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent-glow), 0 0 4px rgba(255,255,255,0.5);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.progress-fill[style*="width: 10"],
+.progress-fill[style*="width: 2"],
+.progress-fill[style*="width: 3"],
+.progress-fill[style*="width: 4"],
+.progress-fill[style*="width: 5"],
+.progress-fill[style*="width: 6"],
+.progress-fill[style*="width: 7"],
+.progress-fill[style*="width: 8"],
+.progress-fill[style*="width: 9"],
+.progress-fill[style*="width: 100"] {
+  opacity: 1;
+}
+
+.progress-fill[style*="width: 100%"] {
+  animation: shimmer 2s infinite linear, glowPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.15); }
+}
+
+/* ─── Category Cards ─── */
+.category {
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-secondary);
+  transition: all var(--transition-base);
+  animation: fadeInUp 0.6s ease-out both;
+  box-shadow: var(--shadow-sm);
+}
+
+.category:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-primary);
+  transform: translateY(-1px);
+}
+
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.cat-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.cat-header:hover::before { opacity: 1; }
+.cat-header:hover { background: linear-gradient(135deg, var(--bg-tertiary), var(--accent-light)); }
+
+.cat-icon {
+  font-size: 1.25rem;
+  color: var(--accent);
+  transition: transform var(--transition-spring);
+}
+
+.cat-header:hover .cat-icon { transform: scale(1.2) rotate(-8deg); }
+
+.cat-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+  transition: color var(--transition-fast);
+}
+
+.cat-badge {
+  font-size: 11px;
+  padding: 3px 12px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform var(--transition-fast);
+}
+
+.cat-header:hover .cat-badge { transform: scale(1.05); }
+
+.badge-high { background: var(--danger-bg); color: var(--danger); }
+.badge-med { background: var(--warn-bg); color: var(--warn); }
+
+.cat-chevron {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  transition: transform var(--transition-spring);
+}
+
+.cat-chevron.open { transform: rotate(180deg); }
+
+.cat-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), padding 0.3s ease;
+  padding: 0 18px;
+}
+
+.cat-body.open {
+  max-height: 3000px;
+  padding: 14px 18px;
+}
+
+/* ─── Topics ─── */
+.topic {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-tertiary);
+  position: relative;
+  transition: all var(--transition-fast);
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: topicEnter 0.4s ease-out forwards;
+}
+
+@keyframes topicEnter {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.topic:last-child { border-bottom: none; }
+
+.topic:hover {
+  background: linear-gradient(90deg, var(--accent-light), transparent 60%);
+  margin: 0 -18px;
+  padding-left: 18px;
+  padding-right: 18px;
+  border-radius: var(--radius-md);
+}
+
+/* ─── Checkbox ─── */
+.check {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  background: var(--bg-secondary);
+  transition: all var(--transition-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.check::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.check:hover {
+  border-color: var(--accent);
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.check:active { transform: scale(0.85); }
+
+.check.done {
+  background: linear-gradient(135deg, #1D9E75, #2dd4a0);
+  border-color: #1D9E75;
+  animation: checkPop 0.4s var(--transition-spring);
+  box-shadow: 0 2px 8px rgba(29,158,117,0.3);
+}
+
+@keyframes checkPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.check.done::after {
+  content: '✓';
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  animation: checkMark 0.3s ease-out;
+}
+
+@keyframes checkMark {
+  from { opacity: 0; transform: scale(0) rotate(-20deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.check.done::before { opacity: 1; }
+
+/* ─── Topic Content ─── */
+.topic-content { flex: 1; }
+
+.topic-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  transition: color var(--transition-fast);
+}
+
+.topic:hover .topic-title { color: var(--accent); }
+
+.topic-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  transition: color var(--transition-fast);
+}
+
+.topic-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  cursor: default;
+}
+
+.tag:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Info Note ─── */
+.lp-note {
+  background: linear-gradient(135deg, var(--info-bg), rgba(230,241,251,0.5));
+  border: 1px solid #85B7EB;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #0C447C;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+  transition: all var(--transition-fast);
+}
+
+.lp-note:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.lp-note::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, #185FA5, transparent);
+}
+
+[data-theme="dark"] .lp-note {
+  background: linear-gradient(135deg, rgba(12,74,110,0.3), rgba(12,74,110,0.1));
+  color: #7dd3fc;
+  border-color: rgba(125,211,252,0.3);
+}
+
+.lp-note i { margin-right: 6px; color: #185FA5; }
+[data-theme="dark"] .lp-note i { color: #7dd3fc; }
+
+/* ─── Section ─── */
+.section { display: none; animation: fadeIn 0.4s ease-out; }
+.section.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Keyboard Hint ─── */
+.keyboard-hint {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--transition-base);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.keyboard-hint.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Completion Celebration ─── */
+.celebration {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.celebration-text {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-shadow: 0 0 30px var(--accent-glow);
+  animation: celebratePop 0.8s var(--transition-spring);
+  opacity: 0;
+}
+
+@keyframes celebratePop {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .root { padding: 1rem; }
+  .tab { padding: 8px 14px; font-size: 13px; }
+  .toolbar-btn { padding: 8px 12px; font-size: 12px; }
+  .cat-header { padding: 12px 14px; }
+  .cat-body.open { padding: 12px 14px; }
+}
+
+/* ─── Focus Visible ─── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: var(--accent-light);
+  color: var(--text-primary);
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="root">
+  <div class="app-header">
+    <h1 class="app-title"><i class="ti ti-target"></i> Interview Prep Tracker</h1>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <i class="ti ti-moon"></i>
+      <i class="ti ti-sun"></i>
+    </button>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('general',this)" data-tab="general"><i class="ti ti-code" aria-hidden="true"></i> General prep</button>
+    <button class="tab" onclick="switchTab('amazon',this)" data-tab="amazon"><i class="ti ti-brand-amazon" aria-hidden="true"></i> Amazon SysDE</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="toolbar-btn save-btn" onclick="saveProgress()"><i class="ti ti-device-floppy"></i> Save progress</button>
+    <button class="toolbar-btn load-btn" onclick="loadProgress()"><i class="ti ti-cloud-download"></i> Load progress</button>
+    <span class="save-meta" id="save-meta"></span>
+    <div class="toast" id="toast"><i class="ti ti-check" id="toast-icon"></i><span id="toast-msg"></span></div>
+  </div>
+
+  <div id="general" class="section active">
+    <div class="progress-bar-wrap">
+      <div class="progress-label"><span>General prep progress</span><span id="g-prog-text">0 / 0 done</span></div>
+      <div class="progress-track"><div class="progress-fill" id="g-prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="category" style="animation-delay:0.05s"><div class="cat-header" onclick="toggleCat('dsa')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-dsa"><i class="ti ti-binary-tree cat-icon" aria-hidden="true"></i><span class="cat-title">Data structures & algorithms</span><span class="cat-badge badge-high">Must know</span><i class="ti ti-chevron-down cat-chevron" id="chev-dsa"></i></div>
+    <div class="cat-body" id="body-dsa">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-g0" onclick="toggle(this,'g0','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Arrays, strings, hashmaps</div><div class="topic-desc">Two pointers, sliding window, prefix sum, anagram checks. Your LeetCode 2000+ means you knew this — re-do 5 mediums to warm up.</div><div class="topic-tags"><span class="tag">LeetCode easy-medium</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-g1" onclick="toggle(this,'g1','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Trees & graphs (BFS/DFS)</div><div class="topic-desc">Binary trees, BST, level-order traversal, connected components, shortest path. High frequency in SDE interviews.</div><div class="topic-tags"><span class="tag">High frequency</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-g2" onclick="toggle(this,'g2','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Dynamic programming</div><div class="topic-desc">1D/2D DP, knapsack, LCS/LIS patterns. Focus on tabulation. Practice explaining the recurrence out loud.</div><div class="topic-tags"><span class="tag">Medium-hard</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-g3" onclick="toggle(this,'g3','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Stacks, queues, heaps</div><div class="topic-desc">Monotonic stack, priority queue for top-k problems, sliding window max. SQS is essentially a distributed queue — tie it to your project.</div></div></div>
+      <div class="topic" style="animation-delay:0.25s"><div class="check" id="ck-g4" onclick="toggle(this,'g4','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Sorting & searching</div><div class="topic-desc">Merge sort, quicksort, binary search variants. Know time/space complexity cold.</div><div class="topic-tags"><span class="tag">Complexity analysis</span></div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.1s"><div class="cat-header" onclick="toggleCat('sys')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-sys"><i class="ti ti-server cat-icon" aria-hidden="true"></i><span class="cat-title">System design fundamentals</span><span class="cat-badge badge-high">Must know</span><i class="ti ti-chevron-down cat-chevron" id="chev-sys"></i></div>
+    <div class="cat-body" id="body-sys">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-g5" onclick="toggle(this,'g5','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">URL shortener internals</div><div class="topic-desc">You built this. Explain: why Cassandra over MySQL, why Redis cache-aside, why Kafka for click tracking, how you'd scale to 10B URLs. Practice in 2 min.</div><div class="topic-tags"><span class="tag">Your project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-g6" onclick="toggle(this,'g6','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Caching patterns</div><div class="topic-desc">Cache-aside, write-through, write-behind, eviction policies (LRU/LFU). Understand cache stampede and how to solve it.</div><div class="topic-tags"><span class="tag">Redis</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-g7" onclick="toggle(this,'g7','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Message queues & event streaming</div><div class="topic-desc">At-least-once vs exactly-once delivery, consumer groups, partition ordering. Dead Letter Queues.</div><div class="topic-tags"><span class="tag">Kafka</span><span class="tag">SQS</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-g8" onclick="toggle(this,'g8','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Database fundamentals</div><div class="topic-desc">SQL vs NoSQL trade-offs, ACID vs BASE. When to use Cassandra vs Redis vs DynamoDB. Index design, sharding, replication.</div><div class="topic-tags"><span class="tag">Very likely asked</span></div></div></div>
+      <div class="topic" style="animation-delay:0.25s"><div class="check" id="ck-g9" onclick="toggle(this,'g9','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">CAP theorem</div><div class="topic-desc">Consistency, Availability, Partition tolerance — only 2. Cassandra (AP), DynamoDB (AP/tunable), PostgreSQL (CP).</div><div class="topic-tags"><span class="tag">Conceptual</span></div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.15s"><div class="cat-header" onclick="toggleCat('infra')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-infra"><i class="ti ti-cloud cat-icon" aria-hidden="true"></i><span class="cat-title">Infrastructure & DevOps knowledge</span><span class="cat-badge badge-med">Important</span><i class="ti ti-chevron-down cat-chevron" id="chev-infra"></i></div>
+    <div class="cat-body" id="body-infra">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-g10" onclick="toggle(this,'g10','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Docker internals</div><div class="topic-desc">Containers vs VMs (namespaces, cgroups). Dockerfile best practices, multi-stage builds, Docker Compose networking.</div><div class="topic-tags"><span class="tag">Your projects</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-g11" onclick="toggle(this,'g11','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Terraform concepts</div><div class="topic-desc">Infrastructure-as-code, state files, providers, plan/apply cycle, modules. Why LocalStack? Local AWS emulation for cost/dev speed.</div><div class="topic-tags"><span class="tag">Your project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-g12" onclick="toggle(this,'g12','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Linux & shell scripting</div><div class="topic-desc">ps, top, lsof, chmod, netstat, curl, cron, pipes, sed/awk. SysDE roles test this hands-on.</div><div class="topic-tags"><span class="tag">Hands-on likely</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-g13" onclick="toggle(this,'g13','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Observability: metrics, logs, alerts</div><div class="topic-desc">Metrics vs logs vs traces. P99 latency, error rate. You built custom CloudWatch metrics — know every field you set.</div><div class="topic-tags"><span class="tag">CloudWatch</span></div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.2s"><div class="cat-header" onclick="toggleCat('java')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-java"><i class="ti ti-coffee cat-icon" aria-hidden="true"></i><span class="cat-title">Java & backend concepts</span><span class="cat-badge badge-med">Important</span><i class="ti ti-chevron-down cat-chevron" id="chev-java"></i></div>
+    <div class="cat-body" id="body-java">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-g14" onclick="toggle(this,'g14','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Java concurrency basics</div><div class="topic-desc">Threads, synchronized, volatile, ExecutorService, CompletableFuture. Race conditions, deadlock detection.</div><div class="topic-tags"><span class="tag">Core Java</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-g15" onclick="toggle(this,'g15','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">REST API design</div><div class="topic-desc">HTTP methods, status codes, idempotency, pagination, versioning. Your S3 clone used REST — trace the full request lifecycle.</div><div class="topic-tags"><span class="tag">Your S3 project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-g16" onclick="toggle(this,'g16','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">JWT & auth flow</div><div class="topic-desc">header.payload.signature, stateless auth, refresh token pattern. You used NextAuth + JWT and Spring Security — trace the full auth flow.</div><div class="topic-tags"><span class="tag">Your projects</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-g17" onclick="toggle(this,'g17','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">OOP & design patterns</div><div class="topic-desc">SOLID principles, factory, singleton, observer patterns. Know these by name and use case.</div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.25s"><div class="cat-header" onclick="toggleCat('resiliency')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-resiliency"><i class="ti ti-shield-check cat-icon" aria-hidden="true"></i><span class="cat-title">Reliability & SRE patterns</span><span class="cat-badge badge-high">Must know for SysDE</span><i class="ti ti-chevron-down cat-chevron" id="chev-resiliency"></i></div>
+    <div class="cat-body" id="body-resiliency">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-g18" onclick="toggle(this,'g18','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Idempotency</div><div class="topic-desc">You used conditional DynamoDB writes. Define: "an operation that produces the same result no matter how many times applied." Crucial for retries.</div><div class="topic-tags"><span class="tag">Your SQS project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-g19" onclick="toggle(this,'g19','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Dead Letter Queues & retry policies</div><div class="topic-desc">Your SQS DLQ: 3 retries → DLQ → CloudWatch alarm. This is textbook resilience. Practice explaining the "why" behind each decision.</div><div class="topic-tags"><span class="tag">Your project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-g20" onclick="toggle(this,'g20','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Chaos engineering</div><div class="topic-desc">You injected poison-pill messages. Know what this tests and what you learned from the results.</div><div class="topic-tags"><span class="tag">Your project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-g21" onclick="toggle(this,'g21','g')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Circuit breakers & bulkheads</div><div class="topic-desc">Circuit breaker stops calling a failing service. Bulkhead isolates failure domains. Know these even if not implemented.</div><div class="topic-tags"><span class="tag">Conceptual</span></div></div></div>
+    </div></div>
+  </div>
+
+  <div id="amazon" class="section">
+    <div class="progress-bar-wrap">
+      <div class="progress-label"><span>Amazon prep progress</span><span id="a-prog-text">0 / 0 done</span></div>
+      <div class="progress-track"><div class="progress-fill" id="a-prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="lp-note"><i class="ti ti-info-circle" aria-hidden="true"></i> Amazon SysDE is ~50% technical (Linux, networking, debugging, infra) and ~50% behavioral using Leadership Principles. Both halves are eliminators.</div>
+
+    <div class="category" style="animation-delay:0.05s"><div class="cat-header" onclick="toggleCat('lp')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-lp"><i class="ti ti-star cat-icon" aria-hidden="true"></i><span class="cat-title">Leadership principles (behavioral)</span><span class="cat-badge badge-high">Eliminates candidates</span><i class="ti ti-chevron-down cat-chevron" id="chev-lp"></i></div>
+    <div class="cat-body" id="body-lp">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-a0" onclick="toggle(this,'a0','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Customer obsession</div><div class="topic-desc">Story: real-time defect dashboard gave supervisors visibility they lacked. "I didn't just build a feature, I eliminated a blind spot." Use STAR format.</div><div class="topic-tags"><span class="tag">STAR format</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-a1" onclick="toggle(this,'a1','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Dive deep</div><div class="topic-desc">Story: debugging SQS DLQ — show you don't stop at "it works." Walk through chaos testing, alarm validation, poison-pill injection results.</div><div class="topic-tags"><span class="tag">Chaos engineering story</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-a2" onclick="toggle(this,'a2','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Bias for action</div><div class="topic-desc">Freelance: delivered multiple production systems without waiting for a perfect spec. Speed with acceptable risk.</div><div class="topic-tags"><span class="tag">Freelance work</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-a3" onclick="toggle(this,'a3','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Ownership</div><div class="topic-desc">You treated client systems like your own production. Stable uptime, audit trails, rollback — ownership beyond "I coded what was asked."</div><div class="topic-tags"><span class="tag">ESM project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.25s"><div class="check" id="ck-a4" onclick="toggle(this,'a4','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Invent & simplify</div><div class="topic-desc">Replacing paper vendor records with CRUD, or manual QR entry with event-driven capture. Both are simplification stories.</div><div class="topic-tags"><span class="tag">Intern project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.3s"><div class="check" id="ck-a5" onclick="toggle(this,'a5','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Earn trust / Are right a lot</div><div class="topic-desc">LeetCode top 2% shows consistency under pressure. If asked when you were wrong — be honest and specific about what changed.</div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.1s"><div class="cat-header" onclick="toggleCat('linux')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-linux"><i class="ti ti-terminal cat-icon" aria-hidden="true"></i><span class="cat-title">Linux & systems debugging</span><span class="cat-badge badge-high">SysDE core</span><i class="ti ti-chevron-down cat-chevron" id="chev-linux"></i></div>
+    <div class="cat-body" id="body-linux">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-a6" onclick="toggle(this,'a6','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Process & memory debugging</div><div class="topic-desc">ps aux, top/htop, lsof, strace, /proc/meminfo, vmstat. "A process is at 100% CPU — diagnose it" is a classic Amazon SysDE question.</div><div class="topic-tags"><span class="tag">Likely asked live</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-a7" onclick="toggle(this,'a7','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Networking fundamentals</div><div class="topic-desc">TCP/IP handshake, DNS, HTTP vs HTTPS, what happens when you type a URL. netstat, ss, curl -v, traceroute.</div><div class="topic-tags"><span class="tag">Very likely asked</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-a8" onclick="toggle(this,'a8','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">File system & permissions</div><div class="topic-desc">inodes, hard vs soft links, chmod octal (755, 644), df -h, du -sh, find + xargs pipelines, bash loops and error handling.</div><div class="topic-tags"><span class="tag">Shell scripting</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-a9" onclick="toggle(this,'a9','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Log analysis: grep/awk/sed</div><div class="topic-desc">"Find all ERROR lines, count by hour" — practice grepping, piping to awk, using cut. Amazon SysDE teams do this daily.</div><div class="topic-tags"><span class="tag">Practical exercise</span></div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.15s"><div class="cat-header" onclick="toggleCat('aws')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-aws"><i class="ti ti-cloud-computing cat-icon" aria-hidden="true"></i><span class="cat-title">AWS services — deep understanding</span><span class="cat-badge badge-high">SysDE core</span><i class="ti ti-chevron-down cat-chevron" id="chev-aws"></i></div>
+    <div class="cat-body" id="body-aws">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-a10" onclick="toggle(this,'a10','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">SQS deep dive</div><div class="topic-desc">Standard vs FIFO, visibility timeout, message retention, long vs short polling, DLQ config. Know every Terraform parameter you set and why.</div><div class="topic-tags"><span class="tag">Your project — be exact</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-a11" onclick="toggle(this,'a11','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">DynamoDB internals</div><div class="topic-desc">Partition keys, sort keys, GSI/LSI, RCU/WCU, conditional writes. Single-table design and hot partition problems.</div><div class="topic-tags"><span class="tag">Your project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-a12" onclick="toggle(this,'a12','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">CloudWatch metrics & alarms</div><div class="topic-desc">Custom metrics namespace, dimensions, alarm states (OK/ALARM/INSUFFICIENT_DATA), composite alarms, SNS integration. You built this end-to-end.</div><div class="topic-tags"><span class="tag">Your project</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-a13" onclick="toggle(this,'a13','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">IAM principles</div><div class="topic-desc">Policies, roles, least-privilege. What permissions did your SQS consumer need and why did you scope them that way in Terraform?</div><div class="topic-tags"><span class="tag">Security angle</span></div></div></div>
+      <div class="topic" style="animation-delay:0.25s"><div class="check" id="ck-a14" onclick="toggle(this,'a14','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">EC2, VPC, security groups basics</div><div class="topic-desc">Subnets, route tables, security group vs NACL, NAT gateway. Not in your projects but Amazon will expect this foundational knowledge.</div><div class="topic-tags"><span class="tag">Foundational</span></div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.2s"><div class="cat-header" onclick="toggleCat('ops')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-ops"><i class="ti ti-activity cat-icon" aria-hidden="true"></i><span class="cat-title">Production operations mindset</span><span class="cat-badge badge-med">SysDE differentiator</span><i class="ti ti-chevron-down cat-chevron" id="chev-ops"></i></div>
+    <div class="cat-body" id="body-ops">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-a15" onclick="toggle(this,'a15','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">On-call & incident response mindset</div><div class="topic-desc">"A CloudWatch alarm fires at 3am — what do you do?" Check DLQ depth → recent deployments → consumer logs → escalate or rollback. Structured triage.</div><div class="topic-tags"><span class="tag">Scenario question</span></div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-a16" onclick="toggle(this,'a16','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Runbook thinking</div><div class="topic-desc">"Write the runbook for redriving messages from your DLQ back to the main queue." Practice step-by-step operational thinking.</div><div class="topic-tags"><span class="tag">Writing exercise</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-a17" onclick="toggle(this,'a17','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Canary & blue/green deployments</div><div class="topic-desc">Canary = 5% traffic to new version first. Blue/green = two identical environments, switch traffic. Risk/benefit trade-offs.</div><div class="topic-tags"><span class="tag">Conceptual</span></div></div></div>
+    </div></div>
+
+    <div class="category" style="animation-delay:0.25s"><div class="cat-header" onclick="toggleCat('proj')" tabindex="0" role="button" aria-expanded="false" aria-controls="body-proj"><i class="ti ti-presentation cat-icon" aria-hidden="true"></i><span class="cat-title">Owning your resume stories</span><span class="cat-badge badge-high">Do this first</span><i class="ti ti-chevron-down cat-chevron" id="chev-proj"></i></div>
+    <div class="cat-body" id="body-proj">
+      <div class="topic" style="animation-delay:0.05s"><div class="check" id="ck-a18" onclick="toggle(this,'a18','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Narrate each project in 90 seconds</div><div class="topic-desc">For each project: problem, what you built, tech choices and why, what you'd do differently. Record yourself.</div></div></div>
+      <div class="topic" style="animation-delay:0.1s"><div class="check" id="ck-a19" onclick="toggle(this,'a19','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Justify every tech choice</div><div class="topic-desc">"Why Cassandra not PostgreSQL?" "Why Kafka not SQS for clicks?" Every tool on your resume is a potential question. One-sentence answer ready for each.</div><div class="topic-tags"><span class="tag">Prepare answers</span></div></div></div>
+      <div class="topic" style="animation-delay:0.15s"><div class="check" id="ck-a20" onclick="toggle(this,'a20','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Know your numbers</div><div class="topic-desc">"What latency on redirects?" "How deep did the DLQ get?" Specific numbers signal real ownership.</div><div class="topic-tags"><span class="tag">Credibility builder</span></div></div></div>
+      <div class="topic" style="animation-delay:0.2s"><div class="check" id="ck-a21" onclick="toggle(this,'a21','a')" tabindex="0" role="checkbox" aria-checked="false"></div><div class="topic-content"><div class="topic-title">Prepare a "what would you improve" answer</div><div class="topic-desc">For your event-driven project: "I'd add distributed tracing with X-Ray and tighter IAM scoping on a real AWS dev account." Shows growth mindset.</div><div class="topic-tags"><span class="tag">Leadership principles</span></div></div></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="keyboard-hint" id="keyboard-hint">
+  <i class="ti ti-keyboard"></i> <strong>Space</strong> to check · <strong>Enter</strong> to expand · <strong>1/2</strong> switch tabs · <strong>D</strong> toggle theme
+</div>
+
+<script>
+const STORAGE_KEY = 'interview-prep-progress';
+const THEME_KEY = 'interview-prep-theme';
+const counts = { g: 0, a: 0 };
+const totals = { g: 0, a: 0 };
+
+// Initialize totals
+document.querySelectorAll('.check').forEach(el => {
+  const sec = el.id.startsWith('ck-g') ? 'g' : 'a';
+  totals[sec]++;
+});
+
+function updateProgress(sec) {
+  const pct = totals[sec] ? Math.round((counts[sec] / totals[sec]) * 100) : 0;
+  const fill = document.getElementById(sec + '-prog-fill');
+  const text = document.getElementById(sec + '-prog-text');
+  fill.style.width = pct + '%';
+  text.textContent = counts[sec] + ' / ' + totals[sec] + ' done';
+
+  // Celebration at 100%
+  if (pct === 100 && counts[sec] > 0) {
+    triggerCelebration(sec === 'g' ? 'General prep' : 'Amazon prep');
+  }
+}
+
+updateProgress('g');
+updateProgress('a');
+
+function toggle(el, id, sec) {
+  const was = el.classList.contains('done');
+  el.classList.toggle('done');
+  el.setAttribute('aria-checked', !was);
+  counts[sec] += was ? -1 : 1;
+  updateProgress(sec);
+
+  // Ripple effect
+  createRipple(el);
+}
+
+function createRipple(el) {
+  const ripple = document.createElement('span');
+  ripple.style.cssText = `
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+    animation: rippleOut 0.5s ease-out forwards;
+    pointer-events: none;
+  `;
+  el.style.position = 'relative';
+  el.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 500);
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+
+  // Re-trigger entrance animations
+  document.getElementById(id).querySelectorAll('.category, .topic').forEach((el, i) => {
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = '';
+  });
+}
+
+function toggleCat(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const header = body.previousElementSibling;
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  chev.classList.toggle('open', !open);
+  header.setAttribute('aria-expanded', !open);
+
+  // Stagger re-animation of children when opening
+  if (!open) {
+    body.querySelectorAll('.topic').forEach((t, i) => {
+      t.style.animation = 'none';
+      t.offsetHeight;
+      t.style.animation = `topicEnter 0.4s ease-out ${i * 0.05}s forwards`;
+    });
+  }
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const icon = document.getElementById('toast-icon');
+  const msgEl = document.getElementById('toast-msg');
+  t.className = 'toast ' + type;
+  icon.className = type === 'success' ? 'ti ti-check' : type === 'error' ? 'ti ti-x' : 'ti ti-info-circle';
+  msgEl.textContent = msg;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+function getState() {
+  const state = { checked: [], savedAt: new Date().toISOString() };
+  document.querySelectorAll('.check.done').forEach(el => state.checked.push(el.id));
+  return state;
+}
+
+function applyState(state) {
+  counts.g = 0; counts.a = 0;
+  document.querySelectorAll('.check').forEach(el => {
+    el.classList.remove('done');
+    el.setAttribute('aria-checked', 'false');
+  });
+  (state.checked || []).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add('done');
+      el.setAttribute('aria-checked', 'true');
+      counts[id.startsWith('ck-g') ? 'g' : 'a']++;
+    }
+  });
+  updateProgress('g');
+  updateProgress('a');
+}
+
+async function saveProgress() {
+  const state = getState();
+  try {
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+    if (!result) { showToast('Save failed — storage unavailable', 'error'); return; }
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('save-meta').textContent = 'Last saved ' + time;
+    showToast('Progress saved (' + state.checked.length + ' items)', 'success');
+  } catch (e) {
+    showToast('Save failed: ' + e.message, 'error');
+  }
+}
+
+async function loadProgress() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY);
+    if (!result || !result.value) { showToast('No saved progress found', 'info'); return; }
+    const state = JSON.parse(result.value);
+    applyState(state);
+    const date = new Date(state.savedAt);
+    const label = date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('save-meta').textContent = 'Loaded from ' + label;
+    showToast('Loaded — ' + state.checked.length + ' items restored', 'success');
+  } catch (e) {
+    showToast('Load failed: ' + e.message, 'error');
+  }
+}
+
+// ─── Theme Toggle ───
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+}
+initTheme();
+
+// ─── Celebration ───
+function triggerCelebration(label) {
+  const existing = document.querySelector('.celebration');
+  if (existing) return;
+
+  const cel = document.createElement('div');
+  cel.className = 'celebration';
+  cel.innerHTML = `<div class="celebration-text">🎉 ${label} complete!</div>`;
+
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-10px';
+    piece.style.background = ['#1D9E75','#185FA5','#F59E0B','#EF4444','#8B5CF6'][Math.floor(Math.random()*5)];
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    cel.appendChild(piece);
+  }
+
+  document.body.appendChild(cel);
+  setTimeout(() => cel.remove(), 4000);
+}
+
+// ─── Keyboard Shortcuts ───
+let hintTimer;
+function showHint() {
+  const hint = document.getElementById('keyboard-hint');
+  hint.classList.add('visible');
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => hint.classList.remove('visible'), 4000);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  if (e.key === '1') {
+    document.querySelector('[data-tab="general"]').click();
+  } else if (e.key === '2') {
+    document.querySelector('[data-tab="amazon"]').click();
+  } else if (e.key === 'd' || e.key === 'D') {
+    toggleTheme();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    const focused = document.activeElement;
+    if (focused && focused.classList.contains('check')) {
+      focused.click();
+    }
+  } else if (e.key === 'Enter') {
+    const focused = document.activeElement;
+    if (focused && focused.classList.contains('cat-header')) {
+      e.preventDefault();
+      focused.click();
+    }
+  }
+
+  showHint();
+});
+
+// ─── Accessibility: Enter/Space on headers ───
+document.querySelectorAll('.cat-header').forEach(h => {
+  h.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      h.click();
+    }
+  });
+});
+
+document.querySelectorAll('.check').forEach(c => {
+  c.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      c.click();
+    }
+  });
+});
+
+// ─── Ripple keyframes injection ───
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes rippleOut {
+    from { transform: scale(0.8); opacity: 1; }
+    to { transform: scale(2); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
