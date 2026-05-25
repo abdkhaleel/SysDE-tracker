@@ -1083,28 +1083,50 @@ function applyState(state) {
 function saveProgress() {
   const state = getState();
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'interview-prep-progress-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('save-meta').textContent = 'Last saved ' + time;
-    showToast('Progress saved (' + state.checked.length + ' items)', 'success');
+    document.getElementById('save-meta').textContent = 'Downloaded at ' + time;
+    showToast('Progress downloaded (' + state.checked.length + ' items)', 'success');
   } catch (e) {
     showToast('Save failed: ' + e.message, 'error');
   }
 }
 
 function loadProgress() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) { showToast('No saved progress found', 'info'); return; }
-    const state = JSON.parse(raw);
-    applyState(state);
-    const date = new Date(state.savedAt);
-    const label = date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('save-meta').textContent = 'Loaded from ' + label;
-    showToast('Loaded — ' + state.checked.length + ' items restored', 'success');
-  } catch (e) {
-    showToast('Load failed: ' + e.message, 'error');
-  }
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.style.display = 'none';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const state = JSON.parse(ev.target.result);
+        applyState(state);
+        const date = state.savedAt ? new Date(state.savedAt) : new Date();
+        const label = date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('save-meta').textContent = 'Loaded from ' + file.name + ' · ' + label;
+        showToast('Loaded — ' + (state.checked || []).length + ' items restored', 'success');
+      } catch (err) {
+        showToast('Invalid JSON file: ' + err.message, 'error');
+      }
+    };
+    reader.onerror = () => showToast('Failed to read file', 'error');
+    reader.readAsText(file);
+    document.body.removeChild(input);
+  };
+  document.body.appendChild(input);
+  input.click();
 }
 
 // ─── Theme Toggle ───
