@@ -1080,11 +1080,10 @@ function applyState(state) {
   updateProgress('a');
 }
 
-async function saveProgress() {
+function saveProgress() {
   const state = getState();
   try {
-    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state));
-    if (!result) { showToast('Save failed — storage unavailable', 'error'); return; }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     document.getElementById('save-meta').textContent = 'Last saved ' + time;
     showToast('Progress saved (' + state.checked.length + ' items)', 'success');
@@ -1093,11 +1092,11 @@ async function saveProgress() {
   }
 }
 
-async function loadProgress() {
+function loadProgress() {
   try {
-    const result = await window.storage.get(STORAGE_KEY);
-    if (!result || !result.value) { showToast('No saved progress found', 'info'); return; }
-    const state = JSON.parse(result.value);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { showToast('No saved progress found', 'info'); return; }
+    const state = JSON.parse(raw);
     applyState(state);
     const date = new Date(state.savedAt);
     const label = date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
